@@ -30,10 +30,15 @@ Then the buttons:
 
 ## Screenshots
 
-**None exist.** This run was executed unattended, and the request to drive Xcode and the iOS Simulator was refused by the platform. `request_access` was attempted three times (the third narrowed to the Simulator alone) and returned, verbatim: *"Computer-use access to "Xcode 26.3", "Simulator" can't be approved during a scheduled run. To grant it, send a message in this conversation (the approval card will appear), or add the app to the scheduled task's settings. (Retrying returns this same result.)"* There is no `Demo/Screenshots/` directory in this repo because there is no screenshot to put in it. Two separate facts, stated separately:
+![Launch state on iPhone 17 Pro Simulator: policy controls, the four actions, and the metrics header showing 16/16 entries after the launch trace](Demo/Screenshots/launch-trace-iphone-17-pro.png)
 
-- **Compiles for a Simulator:** yes — CI on `macos-15` resolves the remote package from GitHub and runs `xcodebuild build -destination 'generic/platform=iOS Simulator'` on every push. See the [Actions tab](https://github.com/rajatslakhina/semantic-response-cache-kit-demo-app/actions).
-- **Ran on a Simulator:** **no.** Nobody has launched this app and looked at it yet. If you do, a PR with a real screenshot would be welcome.
+**One real screenshot, honestly scoped.** The scheduled run that built these repos could not drive Xcode or the Simulator (`request_access` was refused three times: *"Computer-use access … can't be approved during a scheduled run"*). In a follow-up interactive session on the same day the access was granted, `Demo.xcodeproj` was opened in Xcode 26.3, the remote package resolved from GitHub as **semantic-response-cache-kit 1.0.1**, and the **Demo** scheme was run on an **iPhone 17 Pro (iOS 26.3) Simulator**. The app launched, the launch trace ran, and the image above was captured with Simulator's *File → Save Screen* — it is what appeared, not a mockup.
+
+What the screenshot does and does not show:
+
+- **Shows:** the app launched and the launch replay completed — the metrics header reads *Coverage-aware · 16/16 entries*, which is the cache at its 16-entry budget after the 30-prompt trace.
+- **Does not show:** the metrics rows or the per-prompt trace list below the fold, or any button interaction. Clicks into the Simulator window were blocked by the automation's permission gate during that session, so the four actions were **not** exercised by hand. Their behaviour is asserted by the library's tests and traced by the independent review, not by a screenshot.
+- The committed PNG is a 302 px, 32-colour copy (12 KB) — it was transferred through a bandwidth-limited channel; the full-resolution 1206×2622 original is kept locally.
 
 ## How to run it
 
@@ -56,6 +61,7 @@ Requires Xcode 16+ (Swift 6). No signing team is needed for a Simulator build.
 Demo.xcodeproj/project.pbxproj                          hand-written; objectVersion 60, remote package reference pinned to 1.0.0
 Demo.xcodeproj/xcshareddata/xcschemes/Demo.xcscheme     shared scheme
 Demo/DemoApp.swift                                      @main App; owns the launch configuration, hands it to the library's view
+Demo/Screenshots/launch-trace-iphone-17-pro.png         the one real Simulator screenshot (see Screenshots)
 .github/workflows/ci.yml                                macos-15: resolve remote package → build for generic/platform=iOS Simulator
 ```
 
@@ -65,7 +71,7 @@ Demo/DemoApp.swift                                      @main App; owns the laun
 
 - `project.pbxproj` was machine-checked before pushing: braces 33/33, parens 24/24, 22 object ids all defined, zero dangling references, one `XCRemoteSwiftPackageReference` at `https://github.com/rajatslakhina/semantic-response-cache-kit.git` with `kind = upToNextMajorVersion; minimumVersion = 1.0.0`, no local package reference, exactly one target (the `Demo` iOS app), no test or tool targets.
 - **CI:** one `macos-15` job — `xcodebuild -resolvePackageDependencies`, print `Package.resolved`, then `xcodebuild build -scheme Demo -destination 'generic/platform=iOS Simulator'`. The live result is on the [Actions tab](https://github.com/rajatslakhina/semantic-response-cache-kit-demo-app/actions); the resolved-version step in the log shows which library release it actually pulled.
-- **Simulator launch:** did not happen (see Screenshots). This README does not claim otherwise anywhere.
+- **Simulator launch:** happened once, in an interactive follow-up session — Xcode 26.3, iPhone 17 Pro (iOS 26.3), package resolved at 1.0.1, app launched and ran its launch trace; one screenshot captured (see Screenshots). Buttons were **not** exercised by hand.
 - The library's own verification (57 XCTest cases on Linux, warnings-as-errors clean build, iOS compile) is documented in [its README](https://github.com/rajatslakhina/semantic-response-cache-kit#verification--what-actually-happened).
 
 ## License
